@@ -28,6 +28,7 @@ namespace EcomzExercise.Data.Models
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Driver> Drivers { get; set; }
         public virtual DbSet<PaymentType> PaymentTypes { get; set; }
+        public virtual DbSet<Pricing> Pricings { get; set; }
         public virtual DbSet<Ride> Rides { get; set; }
         public virtual DbSet<Shift> Shifts { get; set; }
 
@@ -334,6 +335,22 @@ namespace EcomzExercise.Data.Models
                     .HasColumnName("payment_type_name");
             });
 
+            modelBuilder.Entity<Pricing>(entity =>
+            {
+                entity.ToTable("Pricing");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.PricingName)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnName("pricing_name");
+
+                entity.Property(e => e.PricingPerKm)
+                    .HasColumnType("decimal(18, 2)")
+                    .HasColumnName("pricing_per_km");
+            });
+
             modelBuilder.Entity<Ride>(entity =>
             {
                 entity.ToTable("ride");
@@ -344,11 +361,25 @@ namespace EcomzExercise.Data.Models
 
                 entity.Property(e => e.RideCuponId).HasColumnName("ride_cupon_id");
 
+                entity.Property(e => e.RideCustomerId).HasColumnName("ride_customer_id");
+
                 entity.Property(e => e.RideDestinationAddress).HasColumnName("ride_destination_address");
+
+                entity.Property(e => e.RideDistance)
+                    .HasColumnType("decimal(18, 2)")
+                    .HasColumnName("ride_distance");
 
                 entity.Property(e => e.RideDone).HasColumnName("ride_done");
 
                 entity.Property(e => e.RideEndTime).HasColumnName("ride_end_time");
+
+                entity.Property(e => e.RideEndingLatitude)
+                    .HasColumnType("decimal(18, 6)")
+                    .HasColumnName("ride_ending_latitude");
+
+                entity.Property(e => e.RideEndingLongitude)
+                    .HasColumnType("decimal(18, 6)")
+                    .HasColumnName("ride_ending_longitude");
 
                 entity.Property(e => e.RidePaymentType).HasColumnName("ride_payment_type");
 
@@ -356,9 +387,9 @@ namespace EcomzExercise.Data.Models
                     .HasColumnType("decimal(18, 2)")
                     .HasColumnName("ride_price");
 
-                entity.Property(e => e.RideRewardPoints)
-                    .HasColumnType("decimal(18, 2)")
-                    .HasColumnName("ride_reward_points");
+                entity.Property(e => e.RidePricingId).HasColumnName("ride_pricing_id");
+
+                entity.Property(e => e.RideRewardPoints).HasColumnName("ride_reward_points");
 
                 entity.Property(e => e.RideShiftId).HasColumnName("ride_shift_id");
 
@@ -366,10 +397,24 @@ namespace EcomzExercise.Data.Models
 
                 entity.Property(e => e.RideStartingAddress).HasColumnName("ride_starting_address");
 
+                entity.Property(e => e.RideStartingLatitude)
+                    .HasColumnType("decimal(18, 6)")
+                    .HasColumnName("ride_starting_latitude");
+
+                entity.Property(e => e.RideStartingLongitude)
+                    .HasColumnType("decimal(18, 6)")
+                    .HasColumnName("ride_starting_longitude");
+
                 entity.HasOne(d => d.RideCupon)
                     .WithMany(p => p.Rides)
                     .HasForeignKey(d => d.RideCuponId)
                     .HasConstraintName("FK_ride_cupon_cuponId");
+
+                entity.HasOne(d => d.RideCustomer)
+                    .WithMany(p => p.Rides)
+                    .HasForeignKey(d => d.RideCustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ride_customer_customerId");
 
                 entity.HasOne(d => d.RideDestinationAddressNavigation)
                     .WithMany(p => p.RideRideDestinationAddressNavigations)
@@ -381,6 +426,12 @@ namespace EcomzExercise.Data.Models
                     .WithMany(p => p.Rides)
                     .HasForeignKey(d => d.RidePaymentType)
                     .HasConstraintName("FK_ride_paymentType_paymentTypeid");
+
+                entity.HasOne(d => d.RidePricing)
+                    .WithMany(p => p.Rides)
+                    .HasForeignKey(d => d.RidePricingId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ride_pricing_pricingId");
 
                 entity.HasOne(d => d.RideShift)
                     .WithMany(p => p.Rides)

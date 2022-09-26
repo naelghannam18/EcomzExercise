@@ -108,5 +108,22 @@ namespace EcomzExercise.Controllers
             return BadRequest(res);
         }
 
+
+        /// <summary>
+        /// List Shifts that are Active and available
+        /// </summary>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("available")]
+        public IActionResult GetAvailableShifts()
+        {
+            var res = _shiftService.ListAvailableShifts();
+            if(res != null)
+            {
+                return Ok(res);
+            }
+            return BadRequest(res);
+        }
+
     }
 }

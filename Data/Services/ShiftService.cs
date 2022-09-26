@@ -38,7 +38,7 @@ namespace EcomzExercise.Services
                 Shift newShift = new()
                 {
                     ShiftStart = addShiftVM.ShiftStart,
-                    ShiftEnd = addShiftVM.ShiftStart.AddHours(12),
+                    ShiftEnd = addShiftVM.ShiftEnd,
                     DriverId = addShiftVM.DriverId,
                     ShiftCabId = addShiftVM.ShiftCabId,
                     ShiftIsActive = false,
@@ -52,7 +52,7 @@ namespace EcomzExercise.Services
                 var takenShifts = (from s in _taxiOperatorContext.Shifts
                                    where s.ShiftStart.Day == addShiftVM.ShiftStart.Day
                                    && s.DriverId == addShiftVM.DriverId && s.ShiftCabId == addShiftVM.ShiftCabId
-                                   && (addShiftVM.ShiftStart <= s.ShiftEnd || addShiftVM.ShiftStart >= s.ShiftStart.AddHours(-12))
+
                                    select s).ToList();
 
                 if (takenShifts.Count == 0)
@@ -62,12 +62,51 @@ namespace EcomzExercise.Services
                     return "Success";
                 }
 
-                return "Conflicting Shifts";
+                else
+                {
+                    List<ShiftTimesVM> shiftTimesListVM = new List<ShiftTimesVM>();
+                    foreach (var shift in takenShifts)
+                    {
+                        shiftTimesListVM.Add(new()
+                        {
+                            ShiftId = shift.Id,
+                            StartingTime = shift.ShiftStart,
+                            EndingTime = shift.ShiftEnd
+                        });
+                    }
 
+                    Dictionary<int, bool> ShiftConflictDisct = new Dictionary<int, bool>();
+                    foreach (var shift in shiftTimesListVM)
+                    {
+                        bool notconflict = NotConflict(shift.StartingTime, shift.EndingTime, addShiftVM.ShiftStart, addShiftVM.ShiftEnd);
+                        if (!notconflict)
+                        {
+                            ShiftConflictDisct[shift.ShiftId] = notconflict;
+                        }
+                    }
+
+                    if (ShiftConflictDisct.Count == 0)
+                    {
+                        _taxiOperatorContext.Add(newShift);
+                        _taxiOperatorContext.SaveChanges();
+                        return "Success";
+                    }
+                    else
+                    {
+                        string responseString = "Conflict with Shifts:\n";
+
+                        foreach (var shift in ShiftConflictDisct)
+                        {
+                            responseString += shift.Key + "/n";
+                        }
+                        return responseString;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                Console.WriteLine(ex);
+                return ex.ToString();
             }
         }
 
@@ -106,6 +145,66 @@ namespace EcomzExercise.Services
             catch (Exception ex)
             {
                 return ex.Message;
+            }
+        }
+
+
+        /// <summary>
+        /// List Shifts that are available
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public List<ListShiftsVM> ListAvailableShifts()
+        {
+            try
+            {
+                var shifts = (from s in _taxiOperatorContext.Shifts
+                              join d in _taxiOperatorContext.Drivers
+                              on s.DriverId equals d.DriverId
+                              join c in _taxiOperatorContext.Cabs
+                              on s.ShiftCabId equals c.Id
+                              join m in _taxiOperatorContext.CarModels
+                              on c.CarModelId equals m.Id
+                              where s.ShiftIsAvailable == true
+                              && s.ShiftIsActive == true
+                              select new
+                              {
+                                  m.ModelName,
+                                  d.DriverFirstName,
+                                  d.DriverLastName,
+                                  s.ShiftStart,
+                                  s.ShiftEnd,
+                                  s.ShiftLatitude,
+                                  s.ShiftLongitude,
+                                  s.ShiftIsActive,
+                                  s.ShiftIsAvailable
+
+                              }).ToList();
+                List<ListShiftsVM> listShifts = new List<ListShiftsVM>();
+                foreach (var shift in shifts)
+                {
+                    ListShiftsVM listShiftsVM = new()
+                    {
+                        DriverFirstName = shift.DriverFirstName,
+                        DriverLastName = shift.DriverLastName,
+                        ModelName = shift.ModelName,
+                        ShiftEnds = shift.ShiftEnd,
+                        shiftIsActive = shift.ShiftIsActive,
+                        ShiftIsAvailable = shift.ShiftIsAvailable,
+                        ShiftLatitude = shift.ShiftLatitude,
+                        ShiftLongitude = shift.ShiftLongitude,
+                        ShiftStarts = shift.ShiftStart
+                    };
+                    listShifts.Add(listShiftsVM);
+                }
+                return listShifts;
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+
             }
         }
 
@@ -217,8 +316,6 @@ namespace EcomzExercise.Services
                 var s = _taxiOperatorContext.Shifts.FirstOrDefault(shift => shift.DriverId == updateShiftVM.DriverId && shift.ShiftCabId == updateShiftVM.ShiftCabId);
                 if (s != null)
                 {
-                    s.ShiftLongitude = updateShiftVM.ShiftLongitude;
-                    s.ShiftLatitude = updateShiftVM.ShiftLatitude;
                     s.ShiftStart = updateShiftVM.ShiftStart;
                     s.ShiftEnd = updateShiftVM.ShiftEnd;
                     s.ShiftCabId = updateShiftVM.ShiftCabId;
@@ -238,9 +335,41 @@ namespace EcomzExercise.Services
             }
         }
 
+        /// <summary>
+        /// Check if a Shift Starting and Ending dates conflict with another shift Starting and ending dates;
+        /// </summary>
+        /// <param name="StartingDate"></param>
+        /// <param name="EndingDate"></param>
+        /// <param name="DateStartToCheck"></param>
+        /// <param name="DateEndToCheck"></param>
+        /// <returns></returns>
+        private bool NotConflict(DateTime StartingDate, DateTime EndingDate, DateTime DateStartToCheck, DateTime DateEndToCheck)
+        {
+            // Todo
+            return false;
+        }
 
-        // Add shifts (Authorized Only)
-        // View All Shifts
+        private static class Range
+        {
+            public static IEnumerable<long> Int64(long from, long to, long step)
+            {
+                if (step <= 0L) step = (step == 0L) ? 1L : -step;
+
+                if (from <= to)
+                {
+                    for (long l = from; l <= to; l += step) yield return l;
+                }
+                else
+                {
+                    for (long l = from; l >= to; l -= step) yield return l;
+                }
+            }
+
+            public static IEnumerable<long> Int64(long from, long to)
+            {
+                return Range.Int64(from, to, 1L);
+            }
+        }
 
     }
 }

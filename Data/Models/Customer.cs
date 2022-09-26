@@ -11,6 +11,7 @@ namespace EcomzExercise.Data.Models
         {
             Addresses = new HashSet<Address>();
             Cupons = new HashSet<Cupon>();
+            Rides = new HashSet<Ride>();
         }
 
         public int Id { get; set; }
@@ -29,5 +30,6 @@ namespace EcomzExercise.Data.Models
 
         public virtual ICollection<Address> Addresses { get; set; }
         public virtual ICollection<Cupon> Cupons { get; set; }
+        public virtual ICollection<Ride> Rides { get; set; }
     }
 }

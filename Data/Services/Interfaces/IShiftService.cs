@@ -41,5 +41,11 @@ namespace EcomzExercise.Data.Services.Interfaces
         /// </summary>
         /// <returns></returns>
         public List<ListShiftsVM> ListShifts();
+
+        /// <summary>
+        /// List Available Shifts
+        /// </summary>
+        /// <returns></returns>
+        public List<ListShiftsVM> ListAvailableShifts();
     }
 }

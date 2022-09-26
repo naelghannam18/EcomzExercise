@@ -73,6 +73,7 @@ namespace EcomzExercise
             services.AddTransient<IAdminService, AdminService>();
             services.AddTransient<IRideService, RideService>();
             services.AddTransient<AddressService>();
+            services.AddTransient<CabService>();
 
             services.AddDbContext<TaxiOperatorDbContext>(options => options.UseSqlServer("Data Source=localhost\\SQLEXPRESS;Initial Catalog=TaxiOperatorDb;Integrated Security=True"));
             services.AddSwaggerGen(c =>

@@ -15,12 +15,7 @@ namespace EcomzExercise.Models.View_Models
         public int ShiftCabId { get; set; }
         public DateTime ShiftStart { get; set; }
         public DateTime ShiftEnd { get; set; }
-        public DateTime ShiftLoginTime { get; set; }
-        public DateTime ShiftLogoutTime { get; set; }
-        public bool ShiftIsActive { get; set; } = false;
-        public bool ShiftIsAvailable { get; set; } = false;
-        public decimal ShiftLongitude { get; set; } = 0;
-        public decimal ShiftLatitude { get; set; } = 0;
+
 
     }
 
@@ -41,6 +36,14 @@ namespace EcomzExercise.Models.View_Models
     public class ToggleShiftVM
     {
         public string Email { get; set; }
+    }
+
+    public class ShiftTimesVM
+    {
+        public int ShiftId { get; set; }
+        public DateTime StartingTime { get; set; }
+        public DateTime EndingTime { get; set; }
+
     }
 
 }

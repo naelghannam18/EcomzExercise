@@ -22,7 +22,7 @@ namespace EcomzExercise.Controllers
         /// <param name="addDriverVM"></param>
         /// <returns></returns>
         [AllowAnonymous]
-        [HttpPost("drivers/add")]
+        [HttpPost("add")]
         public IActionResult AddDriver([FromBody] AddDriverVM addDriverVM)
         {
             var result = _driverService.AddDriver(addDriverVM);
@@ -42,7 +42,7 @@ namespace EcomzExercise.Controllers
         /// <returns></returns>
 
         [AllowAnonymous]
-        [HttpGet("drivers/all")]
+        [HttpGet("all")]
         public IActionResult ListDrivers()
         {
             var result = _driverService.ListDrivers();
@@ -99,7 +99,7 @@ namespace EcomzExercise.Controllers
         /// <param name="email"></param>
         /// <returns></returns>
         [AllowAnonymous]
-        [HttpGet("driver/{email}/shifts")]
+        [HttpGet("{email}/shifts")]
         public IActionResult GetDriverShifts(string email)
         {
             var res = _driverService.ListDriverShifts(email);

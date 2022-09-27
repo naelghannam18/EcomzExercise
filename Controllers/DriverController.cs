@@ -21,7 +21,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="addDriverVM"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("add")]
         public IActionResult AddDriver([FromBody] AddDriverVM addDriverVM)
         {
@@ -41,7 +41,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <returns></returns>
 
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpGet("all")]
         public IActionResult ListDrivers()
         {
@@ -80,7 +80,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="driverVM"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles = "Driver")]
         [HttpPut("update")]
         public IActionResult UpdateDriver([FromBody] UpdateDriverVM driverVM)
         {
@@ -98,7 +98,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles = "Driver")]
         [HttpGet("{email}/shifts")]
         public IActionResult GetDriverShifts(string email)
         {

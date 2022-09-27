@@ -24,7 +24,7 @@ namespace EcomzExercise.Controllers
     /// </summary>
     /// <param name="addCustomerVM"></param>
     /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles ="Customer")]
         [HttpPost("add")]
         public IActionResult AddCustomer([FromBody] AddCustomerVM addCustomerVM)
         {
@@ -42,7 +42,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="updateCustomerVM"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles ="Customer")]
         [HttpPut("update")]
 
         public IActionResult UpdateCustomer([FromBody] UpdateCustomerVM updateCustomerVM)
@@ -78,7 +78,7 @@ namespace EcomzExercise.Controllers
         /// List All Customers
         /// </summary>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles ="Admin")]
         [HttpGet("all")]
         public IActionResult GetAllCustomers()
         {
@@ -95,6 +95,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="addCustomerPointsVM"></param>
         /// <returns></returns>
+        [Authorize(Roles = "Admin")]
         [HttpPut("addReward")]
         public IActionResult AddReward([FromBody] AddCustomerPointsVM addCustomerPointsVM)
         {

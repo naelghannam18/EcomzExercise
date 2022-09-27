@@ -15,18 +15,16 @@ namespace EcomzExercise.Data.Services
     {
         private readonly TaxiOperatorDbContext _taxiOperatorDbContext;
         private readonly ICustomerService _customerService;
+        private readonly IBugService _bugService;
 
-        public RideService(TaxiOperatorDbContext taxiOperatorDbContext, ICustomerService customerService)
+        public RideService(TaxiOperatorDbContext taxiOperatorDbContext, ICustomerService customerService, IBugService bugService)
         {
             _taxiOperatorDbContext = taxiOperatorDbContext;
             _customerService = customerService;
+            _bugService = bugService;
         }
 
-        /// <summary>
-        /// Request Ride
-        /// </summary>
-        /// <param name="requestRideVM"></param>
-        /// <returns></returns>
+
         public string RequestRide(RequestRideVM requestRideVM)
         {
             try
@@ -42,7 +40,7 @@ namespace EcomzExercise.Data.Services
                     Cupon cupon = _taxiOperatorDbContext.Cupons.FirstOrDefault(c =>
                     c.CuponCustomerId == requestRideVM.CustomerId &&
                     c.CuponCode == cuponCode &&
-                    c.CuponDateExpiry >= System.DateTime.Now
+                    c.CuponDateExpiry >= DateTime.Now
                     );
                     decimal discount = cupon == null ? 0 : cupon.CuponDiscount;
                     Pricing pricing = _taxiOperatorDbContext.Pricings.FirstOrDefault(p => p.Id == requestRideVM.PricingId);
@@ -85,22 +83,18 @@ namespace EcomzExercise.Data.Services
 
             } catch(Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
             
         }
 
-        /// <summary>
-        /// Return distance in Km between two Coordinates
-        /// </summary>
-        /// <param name="lat"></param>
-        /// <param name="longitude"></param>
-        /// <returns></returns>
         public decimal GetDistanceGoogleMaps(decimal StartingLat, decimal startingLong, decimal endingLat, decimal endingLong)
         {
             try
             {
-                string uri = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + StartingLat.ToString() + "%2C" + startingLong.ToString() + "&destinations="+ endingLat.ToString()+ "%2C"+ endingLong.ToString() + "&key=AIzaSyCIobTRd-i8DoI-rpuSYpk48vV_v5DELWk";
+                string uri = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + StartingLat.ToString() + "%2C" + startingLong.ToString() + "&destinations="+ endingLat.ToString()+ "%2C"+ endingLong.ToString() + "&key={API_KEY}";
                 var httpRequest = (HttpWebRequest)WebRequest.Create(uri);
                 httpRequest.Accept = "application/json";
                 httpRequest.ContentType = "application/json";
@@ -134,18 +128,13 @@ namespace EcomzExercise.Data.Services
                 }
             } catch(Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
                 return 0;
             }
         }
 
-
-        /// <summary>
-        /// Cancel Ride
-        /// </summary>
-        /// <param name="rideId"></param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public string CancelRide(int rideId)
         {
             try
@@ -167,15 +156,12 @@ namespace EcomzExercise.Data.Services
 
             }catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-        /// <summary>
-        /// Ride Finished. Rewards Get Transferred to User.
-        /// </summary>
-        /// <param name="rideId"></param>
-        /// <returns></returns>
         public string RideDone(int rideId)
         {
             try
@@ -204,6 +190,8 @@ namespace EcomzExercise.Data.Services
                 }
             }catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }

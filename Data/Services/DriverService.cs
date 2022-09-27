@@ -1,4 +1,5 @@
 ﻿using EcomzExercise.Data.Models;
+using EcomzExercise.Data.Models.View_Models;
 using EcomzExercise.Data.Services.Interfaces;
 using EcomzExercise.Models;
 using EcomzExercise.Models.Auth;
@@ -15,23 +16,16 @@ namespace EcomzExercise.Services
     {
         private readonly TaxiOperatorDbContext _taxiOperatorContext;
         private readonly IJwtAuth _JwtAuth;
+        private readonly IBugService _bugService;
 
 
-        public DriverService(TaxiOperatorDbContext taxiOperatorContext, IJwtAuth jwtAuth)
+        public DriverService(TaxiOperatorDbContext taxiOperatorContext, IJwtAuth jwtAuth, IBugService bugService)
         {
             _taxiOperatorContext = taxiOperatorContext;
-            _JwtAuth = jwtAuth; 
+            _JwtAuth = jwtAuth;
+            _bugService = bugService;
         }
 
-
-        // add driver
-        #region Add Driver
-
-        /// <summary>
-        /// Adding a Driver
-        /// </summary>
-        /// <param name="tempDriver"></param>
-        /// <returns></returns>
         public string AddDriver(AddDriverVM tempDriver)
         {
             try
@@ -70,52 +64,12 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-        #endregion
-
-        #region List Drivers
-        /// <summary>
-        /// Listing all Drivers
-        /// </summary>
-        /// <returns></returns>
-        public List<ListDriversVm> ListDrivers()
-        {
-            try
-            {
-                List<Driver> Drivers = _taxiOperatorContext.Drivers.ToList();
-                List<ListDriversVm> DriverList = new List<ListDriversVm>();
-                foreach (var driver in Drivers)
-                {
-                    ListDriversVm addDriverVM = new ListDriversVm
-                    {
-                        DateOfBirth = driver.DriverDob,
-                        DriverLicense = driver.DrivingLicenseNumber,
-                        DrivingLicenseExpiry = driver.DrivingLicenseExpiry,
-                        Email = driver.DriverEmail,
-                        FirstName = driver.DriverFirstName,
-                        LastName = driver.DriverLastName,
-                        PhoneNumber = Utilities.Utilities.HashText(driver.DriverPassword),
-                        Username = driver.DriverUsername,
-                    };
-                    DriverList.Add(addDriverVM);
-                }
-                return DriverList;
-
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Driver Login
-        /// </summary>
-        /// <param name="adminLoginVM"></param>
-        /// <returns></returns>
         public string LoginDriver(AdminLoginVM adminLoginVM)
         {
             try
@@ -149,15 +103,13 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-        /// <summary>
-        /// Updating the Driver
-        /// </summary>
-        /// <param name="updateDriver"></param>
-        /// <returns></returns>
+     
         public string UpdateDriver(UpdateDriverVM updateDriver)
         {
             try
@@ -180,15 +132,40 @@ namespace EcomzExercise.Services
                 }
             }catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-        /// <summary>
-        /// If Login Is Successfull we Return A Jwt Token For Authorization
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
+        public string CheckLoginToken(CheckLoginTokenVM checkLoginTokenVM)
+        {
+            try
+            {
+                var driver = _taxiOperatorContext.Drivers.FirstOrDefault(d => d.DriverEmail == checkLoginTokenVM.Email);
+                if (driver != null)
+                {
+                    if(driver.DriverLoginToken == checkLoginTokenVM.LoginToken
+                        && driver.DriverLoginTokenExpiry > DateTime.Now)
+                    {
+                        return "Success";
+                    }else
+                    {
+                        return "Unauthorized";
+                    }
+                }
+                else
+                {
+                    return "UnAuthorized";
+                }
+            }catch (Exception ex)
+            {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
+                return ex.Message;
+            }
+        }
+
         public AuthVM GetDriverLoginResponse(string email)
         {
             try
@@ -212,46 +189,44 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return null;
             }
         }
 
-        /// <summary>
-        /// Checking for login Token VAlidity
-        /// </summary>
-        /// <param name="checkLoginTokenVM"></param>
-        /// <returns></returns>
-        public string CheckLoginToken(CheckLoginTokenVM checkLoginTokenVM)
+        public List<ListDriversVm> ListDrivers()
         {
             try
             {
-                var driver = _taxiOperatorContext.Drivers.FirstOrDefault(d => d.DriverEmail == checkLoginTokenVM.Email);
-                if (driver != null)
+                List<Driver> Drivers = _taxiOperatorContext.Drivers.ToList();
+                List<ListDriversVm> DriverList = new List<ListDriversVm>();
+                foreach (var driver in Drivers)
                 {
-                    if(driver.DriverLoginToken == checkLoginTokenVM.LoginToken
-                        && driver.DriverLoginTokenExpiry > DateTime.Now)
+                    ListDriversVm addDriverVM = new ListDriversVm
                     {
-                        return "Success";
-                    }else
-                    {
-                        return "Unauthorized";
-                    }
+                        DateOfBirth = driver.DriverDob,
+                        DriverLicense = driver.DrivingLicenseNumber,
+                        DrivingLicenseExpiry = driver.DrivingLicenseExpiry,
+                        Email = driver.DriverEmail,
+                        FirstName = driver.DriverFirstName,
+                        LastName = driver.DriverLastName,
+                        PhoneNumber = Utilities.Utilities.HashText(driver.DriverPassword),
+                        Username = driver.DriverUsername,
+                    };
+                    DriverList.Add(addDriverVM);
                 }
-                else
-                {
-                    return "UnAuthorized";
-                }
-            }catch (Exception ex)
+                return DriverList;
+
+            }
+            catch (Exception ex)
             {
-                return ex.Message;
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
+                return null;
             }
         }
 
-        /// <summary>
-        /// List The Drivers Shifts
-        /// </summary>
-        /// <param name="driverEmail"></param>
-        /// <returns></returns>
         public List<ListUserShiftsVM> ListDriverShifts(string driverEmail)
         {
             try
@@ -291,26 +266,12 @@ namespace EcomzExercise.Services
                 }
             }catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex);
                 return null;
             }
         }
-
-
-
-
-        #endregion
-
-
-
-        // login driver
-        // find his shifts
-        // login to shift
-
-
-        // Todo
-        // Accept Rides
-        // Gain Reviews
 
     }
 }

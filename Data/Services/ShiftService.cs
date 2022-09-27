@@ -1,4 +1,5 @@
 ﻿using EcomzExercise.Data.Models;
+using EcomzExercise.Data.Models.View_Models;
 using EcomzExercise.Data.Services.Interfaces;
 using EcomzExercise.Models;
 using EcomzExercise.Models.View_Models;
@@ -16,21 +17,15 @@ namespace EcomzExercise.Services
     {
 
         private readonly TaxiOperatorDbContext _taxiOperatorContext;
+        private readonly IBugService _bugService;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="taxiOperatorContext"></param>
-        public ShiftService(TaxiOperatorDbContext taxiOperatorContext)
+
+        public ShiftService(TaxiOperatorDbContext taxiOperatorContext, IBugService bugService)
         {
             _taxiOperatorContext = taxiOperatorContext;
+            _bugService = bugService;
         }
 
-        /// <summary>
-        /// Add Shift
-        /// </summary>
-        /// <param name="addShiftVM"></param>
-        /// <returns></returns>
         public string AddShift(AddShiftVM addShiftVM)
         {
             try
@@ -41,8 +36,8 @@ namespace EcomzExercise.Services
                     ShiftEnd = addShiftVM.ShiftEnd,
                     DriverId = addShiftVM.DriverId,
                     ShiftCabId = addShiftVM.ShiftCabId,
-                    ShiftIsActive = false,
-                    ShiftIsAvailable = false,
+                    ShiftIsActive = true,
+                    ShiftIsAvailable = true,
                     ShiftLatitude = 0,
                     ShiftLongitude = 0,
                     ShiftLoginTime = DateTime.MinValue,
@@ -75,13 +70,13 @@ namespace EcomzExercise.Services
                         });
                     }
 
-                    Dictionary<int, bool> ShiftConflictDisct = new Dictionary<int, bool>();
+                    Dictionary<int, ShiftTimesVM> ShiftConflictDisct = new Dictionary<int, ShiftTimesVM>();
                     foreach (var shift in shiftTimesListVM)
                     {
                         bool notconflict = NotConflict(shift.StartingTime, shift.EndingTime, addShiftVM.ShiftStart, addShiftVM.ShiftEnd);
                         if (!notconflict)
                         {
-                            ShiftConflictDisct[shift.ShiftId] = notconflict;
+                            ShiftConflictDisct[shift.ShiftId] = shift;
                         }
                     }
 
@@ -97,7 +92,7 @@ namespace EcomzExercise.Services
 
                         foreach (var shift in ShiftConflictDisct)
                         {
-                            responseString += shift.Key + "/n";
+                            responseString += shift.Key + "\nStarting Time: " +shift.Value.StartingTime + "\nEnding time: " +shift.Value.EndingTime +"\n\n";
                         }
                         return responseString;
                     }
@@ -105,16 +100,13 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex);
                 return ex.ToString();
             }
         }
 
-        /// <summary>
-        /// End Shift When Driver Logs Out
-        /// </summary>
-        /// <param name="driverEmail"></param>
-        /// <returns></returns>
         public string EndShift(ToggleShiftVM driverEmail)
         {
             try
@@ -144,16 +136,12 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-
-        /// <summary>
-        /// List Shifts that are available
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public List<ListShiftsVM> ListAvailableShifts()
         {
             try
@@ -167,6 +155,8 @@ namespace EcomzExercise.Services
                               on c.CarModelId equals m.Id
                               where s.ShiftIsAvailable == true
                               && s.ShiftIsActive == true
+                              && DateTime.Now >= s.ShiftStart
+                              && DateTime.Now <= s.ShiftEnd
                               select new
                               {
                                   m.ModelName,
@@ -202,17 +192,14 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
                 return null;
 
             }
         }
 
-        /// <summary>
-        /// Listing All Shifts
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public List<ListShiftsVM> ListShifts()
         {
             try
@@ -259,17 +246,14 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
+
                 return null;
 
             }
         }
 
-        /// <summary>
-        /// Start Shift When Driver Logs In
-        /// </summary>
-        /// <param name="driverEmail"></param>
-        /// <returns></returns>
         public string StartShift(ToggleShiftVM driverEmail)
         {
             try
@@ -299,15 +283,12 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-        /// <summary>
-        /// Update Shift
-        /// </summary>
-        /// <param name="updateShiftVM"></param>
-        /// <returns></returns>
         public string UpdateShift(AddShiftVM updateShiftVM)
         {
             try
@@ -331,21 +312,20 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-        /// <summary>
-        /// Check if a Shift Starting and Ending dates conflict with another shift Starting and ending dates;
-        /// </summary>
-        /// <param name="StartingDate"></param>
-        /// <param name="EndingDate"></param>
-        /// <param name="DateStartToCheck"></param>
-        /// <param name="DateEndToCheck"></param>
-        /// <returns></returns>
+        // Returns if Two Given Shifts Conflict
         private bool NotConflict(DateTime StartingDate, DateTime EndingDate, DateTime DateStartToCheck, DateTime DateEndToCheck)
         {
 
+            if (DateStartToCheck > StartingDate && DateStartToCheck > EndingDate)
+                return true;
+            else if (DateStartToCheck < StartingDate && DateEndToCheck < StartingDate)
+                return true;
 
             return false;
             

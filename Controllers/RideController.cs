@@ -25,7 +25,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="requestRideVM"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles = "Customer")]
         [HttpPost("request")]
         public IActionResult RequestRide([FromBody] RequestRideVM requestRideVM)
         {
@@ -42,7 +42,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="rideId"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles = "Customer")]
         [HttpPut("{rideId}/cancel")]
         public IActionResult CancelRide(int rideId)
         {
@@ -59,7 +59,7 @@ namespace EcomzExercise.Controllers
         /// </summary>
         /// <param name="rideId"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles = "Driver")]
         [HttpPut("{rideId}/finish")]
         public IActionResult FinishRide(int rideId)
         {

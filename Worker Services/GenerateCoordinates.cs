@@ -12,9 +12,13 @@ using System.Threading.Tasks;
 using EcomzExercise.Data.Models;
 using System.Collections.Generic;
 using System.Linq;
+using EcomzExercise.Data.Models.View_Models;
+using EcomzExercise.Data.Services;
 
 namespace EcomzExercise.Worker_Services
 {
+    // This Background Service is used to Change Shift Coordinates
+    // To simulate a Working driver 
     public class GenerateCoordinates : BackgroundService
     {
         private readonly IServiceScopeFactory scopeFactory;
@@ -40,12 +44,13 @@ namespace EcomzExercise.Worker_Services
             using (var scope = scopeFactory.CreateScope())
             {
                 var _db = scope.ServiceProvider.GetRequiredService<TaxiOperatorDbContext>();
+                var _bugService = scope.ServiceProvider.GetRequiredService<IBugService>();
                 try
                 {
                     var shifts = _db.Shifts.ToList();
                     foreach (var shift in shifts)
                     {
-                        Dictionary<string, decimal> coordinates = GenerateRandomCoordinates(33.888630, 35.49580, 500); // Coordinates of beirut and a 50km Radius
+                        Dictionary<string, decimal> coordinates = GenerateRandomCoordinates(33.888630, 35.49580, 1500); // Coordinates of beirut and a 50km Radius
                         shift.ShiftLatitude = coordinates["latitude"];
                         shift.ShiftLongitude = coordinates["longitude"];
                     }
@@ -53,6 +58,8 @@ namespace EcomzExercise.Worker_Services
                 }
                 catch (WebException ex)
                 {
+                    BugListVM bug = _bugService.ExceptionToBug(ex);
+                    _bugService.AddBug(bug);
                     Console.WriteLine(ex.Message);
                 }
                 
@@ -60,12 +67,12 @@ namespace EcomzExercise.Worker_Services
             return Task.FromResult("Done");
         }
 
-
-        private Dictionary<string, decimal> GenerateRandomCoordinates(double lat, double longi, double radius)
+        // Generating Random Coordinates Within a Certain Radius
+        private Dictionary<string, decimal> GenerateRandomCoordinates(double CenterLat, double CenterLmg, double radiusInMeters)
         {
-            var y0 = lat;
-            var x0 = longi;
-            var rd = radius / 111300;
+            var y0 = CenterLat;
+            var x0 = CenterLmg;
+            var rd = radiusInMeters / 111300; 
             Random rand = new Random();
             var u = rand.NextDouble();
             var v = rand.NextDouble();

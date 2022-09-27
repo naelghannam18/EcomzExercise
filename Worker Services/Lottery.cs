@@ -12,7 +12,8 @@ namespace EcomzExercise.Worker_Services
 {
     /// <summary>
     /// Lottery Background Service
-    /// Checks every 24 for users with points > 200 then deducts the points and creates a Cupon code
+    /// Checks every 24 if its first of the month to run the lottery at first of month
+    /// for users with points > 200 then deducts the points and creates a Cupon code
     /// </summary>
     public class Lottery : BackgroundService
     {
@@ -24,14 +25,15 @@ namespace EcomzExercise.Worker_Services
             this.scopeFactory = scopeFactory;
         }
 
-        private const int generalDelay = 1000 * 60 * 60 * 24; // 24 hours
+        private const int generalDelay = 1000*60*60*24; // 24 hours
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(generalDelay, stoppingToken);
-                await CheckForCupons();
+                if (DateTime.Now.Day == 1)
+                    await CheckForCupons();
             }
         }
         private Task CheckForCupons()

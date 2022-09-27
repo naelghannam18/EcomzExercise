@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -73,6 +74,7 @@ namespace EcomzExercise
             services.AddTransient<IShiftService,ShiftService>();
             services.AddTransient<IAdminService, AdminService>();
             services.AddTransient<IRideService, RideService>();
+            services.AddTransient<IBugService, BugService>();
             services.AddTransient<AddressService>();
             services.AddTransient<CabService>();
 
@@ -118,7 +120,7 @@ namespace EcomzExercise
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
+                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter your token in the text input below.\r\n\r\n",
                 });
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement {
                 {
@@ -140,8 +142,17 @@ namespace EcomzExercise
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            StaticFileOptions options = new StaticFileOptions()
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] = $"public max-age=20"; // public caching for 20 seconds
+                }
+            };
 
-            app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseStaticFiles(options);
+
+            app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()); // In Production Origins Should be Set For Security Reasons
 
             if (env.IsDevelopment())
             {
@@ -149,6 +160,8 @@ namespace EcomzExercise
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EcomzExercise v1"));
             }
+
+            app.UseAuthentication();
 
             app.UseHttpsRedirection();
 

@@ -20,7 +20,7 @@ namespace EcomzExercise.Controllers
         /// List All Cabs
         /// </summary>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Roles ="Admin")]
         [HttpGet("allCabs")]
 
         public IActionResult GetAllCabs()

@@ -20,6 +20,7 @@ namespace EcomzExercise.Data.Models
         public virtual DbSet<Address> Addresses { get; set; }
         public virtual DbSet<AddressType> AddressTypes { get; set; }
         public virtual DbSet<Admin> Admins { get; set; }
+        public virtual DbSet<Bug> Bugs { get; set; }
         public virtual DbSet<Cab> Cabs { get; set; }
         public virtual DbSet<CarModel> CarModels { get; set; }
         public virtual DbSet<City> Cities { get; set; }
@@ -122,6 +123,29 @@ namespace EcomzExercise.Data.Models
                 entity.Property(e => e.AdminRoleName)
                     .IsRequired()
                     .HasColumnName("admin_role_name");
+            });
+
+            modelBuilder.Entity<Bug>(entity =>
+            {
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.ErrorInnerException).HasColumnName("error_inner_exception");
+
+                entity.Property(e => e.ErrorMessage)
+                    .IsRequired()
+                    .HasColumnName("error_Message");
+
+                entity.Property(e => e.ErrorSource)
+                    .IsRequired()
+                    .HasColumnName("error_source");
+
+                entity.Property(e => e.ErrorStacktrace)
+                    .IsRequired()
+                    .HasColumnName("error_stacktrace");
+
+                entity.Property(e => e.ErrorTargetSite)
+                    .IsRequired()
+                    .HasColumnName("error_target_site");
             });
 
             modelBuilder.Entity<Cab>(entity =>

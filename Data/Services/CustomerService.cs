@@ -1,4 +1,5 @@
 ﻿using EcomzExercise.Data.Models;
+using EcomzExercise.Data.Models.View_Models;
 using EcomzExercise.Data.Services.Interfaces;
 using EcomzExercise.Models;
 using EcomzExercise.Models.Auth;
@@ -14,19 +15,16 @@ namespace EcomzExercise.Services
     {
         private readonly TaxiOperatorDbContext _taxiOperatorDbContext;
         private readonly IJwtAuth _jwtAuth;
+        private readonly IBugService _bugService;
 
 
-        public CustomerService(TaxiOperatorDbContext taxiOperatorDbContext, IJwtAuth jwtAuth)
+        public CustomerService(TaxiOperatorDbContext taxiOperatorDbContext, IJwtAuth jwtAuth, IBugService bugService)
         {
             _taxiOperatorDbContext = taxiOperatorDbContext;
             _jwtAuth = jwtAuth;
+            _bugService = bugService;
         }
 
-        /// <summary>
-        /// Add User
-        /// </summary>
-        /// <param name="addCustomerVM"></param>
-        /// <returns></returns>
         public string AddCustomer(AddCustomerVM addCustomerVM)
         {
             try
@@ -66,14 +64,13 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
-        /// <summary>
-        /// Add points to customer on Rides
-        /// </summary>
-        /// <param name="addCustomerPointsVM"></param>
+        
         public void AddCustomerPoints(AddCustomerPointsVM addCustomerPointsVM)
         {
             try
@@ -95,115 +92,13 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
             }
         }
 
-        public AuthVM GetLoginResponse(string email)
-        {
-            try
-            {
-                var customer = _taxiOperatorDbContext.Customers.FirstOrDefault(c => c.CustomerEmail == email);
-                // test permissions
 
-                AdminRole permissions = new AdminRole
-                {
-                    AdminRoleName = "Customer",
-                    AdminRoles = 1,
-                    ManageRole = false,
-                    ManageUser = false,
-                    ViewRoles = false,
-                    ViewUser = true
-                };
-
-                string token = _jwtAuth.Authentication(customer.CustomerEmail, "Customer");
-                AuthVM response = new AuthVM { AdminId = customer.Id, Email = customer.CustomerEmail, LoginToken = customer.CustomerLoginToken, Token = token, Permissions = permissions };
-                return response;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// List All Users
-        /// </summary>
-        /// <returns></returns>
-
-        public List<ListCustomersVM> ListCustomers()
-        {
-            try
-            {
-                var c = _taxiOperatorDbContext.Customers.ToList();
-                List<ListCustomersVM> listCustomers = new List<ListCustomersVM>();
-                foreach (var customer in c)
-                {
-                    ListCustomersVM listCustomersVM = new()
-                    {
-                        CustomerDob = customer.CustomerDob,
-                        CustomerEmail = customer.CustomerEmail,
-                        CustomerFirstName = customer.CustomerFirstName,
-                        CustomerLastName = customer.CustomerLastName,
-                        CustomerGender = customer.CustomerGender,
-                        CustomerPoints = customer.CustomerPoints,
-                    };
-                    listCustomers.Add(listCustomersVM);
-                }
-                return listCustomers;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// return Cupons That Belong To Customer
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        public List<ListCuponVM> ListUserCupons(string email)
-        {
-            try
-            {
-                var cust = _taxiOperatorDbContext.Customers.FirstOrDefault(customer => customer.CustomerEmail == email);
-                if (cust != null)
-                {
-                    var cupons = (from c in _taxiOperatorDbContext.Cupons
-                                  where c.CuponCustomerId == cust.Id
-                                  select c).ToList();
-                    List<ListCuponVM> list = new List<ListCuponVM>();
-                    foreach (var cupon in cupons)
-                    {
-                        list.Add(new ListCuponVM()
-                        {
-                            CuponCode = cupon.CuponCode,
-                            CuponDateExpiry = cupon.CuponDateExpiry,
-                            CuponDateIssued = cupon.CuponDateIssued,
-                            CuponDiscount = cupon.CuponDiscount
-                        });
-                    }
-                    return list;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Login user
-        /// </summary>
-        /// <param name="loginUserVM"></param>
-        /// <returns></returns>
         public string LoginUser(AdminLoginVM loginUserVM)
         {
             try
@@ -237,16 +132,13 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
 
-        /// <summary>
-        /// Updating a Customer
-        /// </summary>
-        /// <param name="updateCustomerVM"></param>
-        /// <returns></returns>
         public string UpdateCustomer(UpdateCustomerVM updateCustomerVM)
         {
             try
@@ -273,18 +165,107 @@ namespace EcomzExercise.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }
 
+        public AuthVM GetLoginResponse(string email)
+        {
+            try
+            {
+                var customer = _taxiOperatorDbContext.Customers.FirstOrDefault(c => c.CustomerEmail == email);
+                // test permissions
 
+                AdminRole permissions = new AdminRole
+                {
+                    AdminRoleName = "Customer",
+                    AdminRoles = 1,
+                    ManageRole = false,
+                    ManageUser = false,
+                    ViewRoles = false,
+                    ViewUser = true
+                };
 
+                string token = _jwtAuth.Authentication(customer.CustomerEmail, "Customer");
+                AuthVM response = new AuthVM { AdminId = customer.Id, Email = customer.CustomerEmail, LoginToken = customer.CustomerLoginToken, Token = token, Permissions = permissions };
+                return response;
+            }
+            catch (Exception ex)
+            {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
+                return null;
+            }
+        }
 
+        public List<ListCustomersVM> ListCustomers()
+        {
+            try
+            {
+                var c = _taxiOperatorDbContext.Customers.ToList();
+                List<ListCustomersVM> listCustomers = new List<ListCustomersVM>();
+                foreach (var customer in c)
+                {
+                    ListCustomersVM listCustomersVM = new()
+                    {
+                        CustomerDob = customer.CustomerDob,
+                        CustomerEmail = customer.CustomerEmail,
+                        CustomerFirstName = customer.CustomerFirstName,
+                        CustomerLastName = customer.CustomerLastName,
+                        CustomerGender = customer.CustomerGender,
+                        CustomerPoints = customer.CustomerPoints,
+                    };
+                    listCustomers.Add(listCustomersVM);
+                }
+                return listCustomers;
+            }
+            catch (Exception ex)
+            {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
 
-        // Todo
-        // Add Customer
-        // Customer Login
-        // Update Customer
-        // Get Points 
+        public List<ListCuponVM> ListUserCupons(string email)
+        {
+            try
+            {
+                var cust = _taxiOperatorDbContext.Customers.FirstOrDefault(customer => customer.CustomerEmail == email);
+                if (cust != null)
+                {
+                    var cupons = (from c in _taxiOperatorDbContext.Cupons
+                                  where c.CuponCustomerId == cust.Id
+                                  select c).ToList();
+                    List<ListCuponVM> list = new List<ListCuponVM>();
+                    foreach (var cupon in cupons)
+                    {
+                        list.Add(new ListCuponVM()
+                        {
+                            CuponCode = cupon.CuponCode,
+                            CuponDateExpiry = cupon.CuponDateExpiry,
+                            CuponDateIssued = cupon.CuponDateIssued,
+                            CuponDiscount = cupon.CuponDiscount
+                        });
+                    }
+                    return list;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
     }
 }

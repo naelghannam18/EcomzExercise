@@ -31,7 +31,7 @@ namespace EcomzExercise.Models.Auth
                         new Claim(ClaimTypes.Email, Email),
                         new Claim(ClaimTypes.Role, Role),
                     }),
-                Expires = DateTime.UtcNow.AddHours(1), // Token Expires After 1 hour
+                Expires = DateTime.Now.AddHours(1), // Token Expires After 1 hour
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
             };

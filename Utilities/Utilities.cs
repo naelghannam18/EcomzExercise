@@ -5,8 +5,16 @@ using System;
 
 namespace EcomzExercise.Utilities
 {
+    /// <summary>
+    /// Utility Class For Encryption And Hashing
+    /// </summary>
     public class Utilities
     {
+
+        // Encryption Was Not Used in This Project Because There is no Front End And All work is Local
+        #region Encryption
+
+        // Used To Encrypt Data 
         public static string EncryptByAES(string input)
         {
             string EncryptionKey = "5v8y/B?E(H+MbQeThWmZq4t7w9z$C&F)"; // TODO: Securing Keys
@@ -34,6 +42,8 @@ namespace EcomzExercise.Utilities
                 }
             }
         }
+
+        // Used To Decrypt Data
         public static string DecryptByAES(string input)
         {
             string EncryptionKey = "5v8y/B?E(H+MbQeThWmZq4t7w9z$C&F)"; // TODO: Secure Keys
@@ -60,6 +70,12 @@ namespace EcomzExercise.Utilities
                 }
             }
         }
+
+        #endregion
+
+        // Hashing Using Bcrypt Package
+        #region Hashing
+
         public static string HashText(string text)
         {
             return BCrypt.Net.BCrypt.HashPassword(text);
@@ -68,33 +84,8 @@ namespace EcomzExercise.Utilities
         {
             return BCrypt.Net.BCrypt.Verify(text, hash);
         }
-        public static string GenerateSignature(string timestamp, string method, string url, string body, string appSecret)
-        {
-            return GetHMACInHex(appSecret, timestamp + method + url + body);
-        }
-        public static string GetHMACInHex(string key, string data)
-        {
-            var hmacKey = Encoding.UTF8.GetBytes(key);
-            var dataBytes = Encoding.UTF8.GetBytes(data);
 
-            using (var hmac = new HMACSHA256(hmacKey))
-            {
-                var sig = hmac.ComputeHash(dataBytes);
-                return ByteToHexString(sig);
-            }
-        }
-        static string ByteToHexString(byte[] bytes)
-        {
-            char[] c = new char[bytes.Length * 2];
-            int b;
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                b = bytes[i] >> 4;
-                c[i * 2] = (char)(87 + b + (((b - 10) >> 31) & -39));
-                b = bytes[i] & 0xF;
-                c[i * 2 + 1] = (char)(87 + b + (((b - 10) >> 31) & -39));
-            }
-            return new string(c);
-        }
+        #endregion
+
     }
 }

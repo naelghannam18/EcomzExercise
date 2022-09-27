@@ -1,5 +1,6 @@
 ﻿using EcomzExercise.Data.Models;
 using EcomzExercise.Data.Models.View_Models;
+using EcomzExercise.Data.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,12 @@ namespace EcomzExercise.Data.Services
     public class AddressService
     {
         private readonly TaxiOperatorDbContext _taxiOperatorDbContext;
+        private readonly IBugService _bugService;
 
-        public AddressService(TaxiOperatorDbContext taxiOperatorDbContext)
+        public AddressService(TaxiOperatorDbContext taxiOperatorDbContext, IBugService bugService)
         {
             _taxiOperatorDbContext = taxiOperatorDbContext;
+            _bugService = bugService;
         }
 
         public List<ListCountryVM> ListCountries()
@@ -35,6 +38,8 @@ namespace EcomzExercise.Data.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
                 return null;
             }
@@ -59,6 +64,8 @@ namespace EcomzExercise.Data.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
                 return null;
             }
@@ -89,6 +96,8 @@ namespace EcomzExercise.Data.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
                 return null;
             }
@@ -114,6 +123,8 @@ namespace EcomzExercise.Data.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
                 return null;
             }
@@ -163,6 +174,8 @@ namespace EcomzExercise.Data.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 Console.WriteLine(ex.Message);
                 return null;
             }
@@ -188,6 +201,8 @@ namespace EcomzExercise.Data.Services
             }
             catch (Exception ex)
             {
+                BugListVM bug = _bugService.ExceptionToBug(ex);
+                _bugService.AddBug(bug);
                 return ex.Message;
             }
         }

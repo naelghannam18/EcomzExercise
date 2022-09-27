@@ -22,8 +22,10 @@ namespace EcomzExercise.Controllers
         /// Add Address
         /// </summary>
         /// <param name="addAddressVm"></param>
-        /// <returns></returns>
-        [AllowAnonymous]
+        /// <returns>Status Code</returns>
+        /// <response code="200">Shift Ended Successfully</response>
+        /// <response code="500">Internal Server Error. Please Report To Devs</response>
+        [Authorize(Roles ="Customer")]
         [HttpPost("add")]
         public IActionResult AddAddress([FromBody] AddAddressVM addAddressVm)
         {
@@ -32,14 +34,16 @@ namespace EcomzExercise.Controllers
             {
                 return Ok(res);
             }
-            return BadRequest(res);
+            return StatusCode(500, res);
         }
 
         /// <summary>
         /// List All User Addresses
         /// </summary>
-        /// <returns></returns>
-        [AllowAnonymous]
+        /// <returns>List Of All Addresses</returns>
+        /// <response code="200">Addreseses Returned Successfully</response>
+        /// <response code="500">Internal Server Error. Please Report To Devs</response>
+        [Authorize(Roles = "Admin")]
         [HttpGet("all")]
         public IActionResult GetAllAddress()
         {
@@ -48,13 +52,15 @@ namespace EcomzExercise.Controllers
             {
                 return Ok(res);
             }
-            return BadRequest(res);
+            return StatusCode(500, res);
         }
 
         /// <summary>
         /// List All Countries
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List Of Countries</returns>
+        /// <response code="200">Countries Returned Successfully</response>
+        /// <response code="500">Internal Server Error. Please Report To Devs</response>
         [AllowAnonymous]
         [HttpGet("countries/all")]
         public IActionResult GetAllCountries()
@@ -64,13 +70,15 @@ namespace EcomzExercise.Controllers
             {
                 return Ok(res);
             }
-            return BadRequest(res);
+            return StatusCode(500, res);
         }
 
         /// <summary>
         /// List All Cities
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List Of Cities</returns>
+        /// <response code="200">Cities Returned Successfully</response>
+        /// <response code="500">Internal Server Error. Please Report To Devs</response>
         [AllowAnonymous]
         [HttpGet("cities/all")]
         public IActionResult GetAllCities()
@@ -80,13 +88,15 @@ namespace EcomzExercise.Controllers
             {
                 return Ok(res);
             }
-            return BadRequest(res);
+            return StatusCode(500, res);
         }
 
         /// <summary>
         /// List All Address Types
         /// </summary>
-        /// <returns></returns>
+        /// <returns>List Of Address types</returns>
+        /// <response code="200">Types Returned Successfully</response>
+        /// <response code="500">Internal Server Error. Please Report To Devs</response>
         [AllowAnonymous]
         [HttpGet("addressTypes/all")]
         public IActionResult GetAllAddressTypes()
@@ -96,7 +106,7 @@ namespace EcomzExercise.Controllers
             {
                 return Ok(res);
             }
-            return BadRequest(res);
+            return StatusCode(500, res);
         }
 
 
@@ -104,8 +114,10 @@ namespace EcomzExercise.Controllers
         /// List User Specific Addresses
         /// </summary>
         /// <param name="email"></param>
-        /// <returns></returns>
-        [AllowAnonymous]
+        /// <returns>Returns Addresses That Belong To A Customer</returns>
+        /// <response code="200">Addresses Returned Successfully</response>
+        /// <response code="500">Internal Server Error. Please Report To Devs</response>
+        [Authorize(Roles ="Customer")]
         [HttpGet("user/{email}")]
         public IActionResult GetAllAddress(string email)
         {
@@ -114,7 +126,7 @@ namespace EcomzExercise.Controllers
             {
                 return Ok(res);
             }
-            return BadRequest(res);
+            return StatusCode(500, res);
         }
 
     }

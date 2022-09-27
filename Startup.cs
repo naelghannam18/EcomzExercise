@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -75,7 +76,27 @@ namespace EcomzExercise
             services.AddTransient<AddressService>();
             services.AddTransient<CabService>();
 
+
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(new RequireHttpsAttribute());
+            });
+
+            services.AddCors(c =>
+            {
+                c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod()
+                .AllowAnyHeader());
+            });
+
+            //JSON Serializer
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+                .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver
+                = new DefaultContractResolver());
+
             services.AddDbContext<TaxiOperatorDbContext>(options => options.UseSqlServer("Data Source=localhost\\SQLEXPRESS;Initial Catalog=TaxiOperatorDb;Integrated Security=True"));
+
             services.AddSwaggerGen(c =>
             {
                 c.EnableAnnotations();
@@ -119,6 +140,9 @@ namespace EcomzExercise
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

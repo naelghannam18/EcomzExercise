@@ -345,31 +345,13 @@ namespace EcomzExercise.Services
         /// <returns></returns>
         private bool NotConflict(DateTime StartingDate, DateTime EndingDate, DateTime DateStartToCheck, DateTime DateEndToCheck)
         {
-            // Todo
+
+
             return false;
+            
         }
 
-        private static class Range
-        {
-            public static IEnumerable<long> Int64(long from, long to, long step)
-            {
-                if (step <= 0L) step = (step == 0L) ? 1L : -step;
-
-                if (from <= to)
-                {
-                    for (long l = from; l <= to; l += step) yield return l;
-                }
-                else
-                {
-                    for (long l = from; l >= to; l -= step) yield return l;
-                }
-            }
-
-            public static IEnumerable<long> Int64(long from, long to)
-            {
-                return Range.Int64(from, to, 1L);
-            }
-        }
+       
 
     }
 }

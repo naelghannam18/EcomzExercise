@@ -45,7 +45,7 @@ namespace EcomzExercise.Worker_Services
                     var shifts = _db.Shifts.ToList();
                     foreach (var shift in shifts)
                     {
-                        Dictionary<string, decimal> coordinates = GenerateRandomCoordinates(33.888630, 35.49580, 50); // Coordinates of beirut and a 50km Radius
+                        Dictionary<string, decimal> coordinates = GenerateRandomCoordinates(33.888630, 35.49580, 500); // Coordinates of beirut and a 50km Radius
                         shift.ShiftLatitude = coordinates["latitude"];
                         shift.ShiftLongitude = coordinates["longitude"];
                     }

@@ -27,7 +27,7 @@ namespace EcomzExercise.Controllers
         /// <response code="400">Admin Already Exists</response>
         /// <response code="500">Internal Server Error. Please Contact Devs</response>
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")] This is to allowed for testing Purposes.
         [HttpPost("add")]
         public IActionResult AddAdmin([FromBody] ManageAdminVM manageAdminVM)
         {

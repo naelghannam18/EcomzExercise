@@ -1,6 +1,7 @@
 using EcomzExercise.Data.Models;
 using EcomzExercise.Data.Services;
 using EcomzExercise.Data.Services.Interfaces;
+using EcomzExercise.Middleware;
 using EcomzExercise.Models;
 using EcomzExercise.Models.Auth;
 using EcomzExercise.Services;
@@ -9,11 +10,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
@@ -46,6 +49,10 @@ namespace EcomzExercise
         {
 
             services.AddControllers();
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
+            });
 
             var key = "VerySecureKeyToBeChangedLaterForSecurityReasons"; //TODO: Change the key into Something Secure
             services.AddAuthentication(x =>
@@ -96,6 +103,7 @@ namespace EcomzExercise
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
                 .AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver
                 = new DefaultContractResolver());
+           
 
             services.AddDbContext<TaxiOperatorDbContext>(options => options.UseSqlServer("Data Source=localhost\\SQLEXPRESS;Initial Catalog=TaxiOperatorDb;Integrated Security=True"));
 
@@ -167,6 +175,7 @@ namespace EcomzExercise
 
             app.UseRouting();
 
+            app.UseMiddleware<HttpLoggingMiddleware>();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

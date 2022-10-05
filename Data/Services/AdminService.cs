@@ -23,7 +23,7 @@ namespace EcomzExercise.Services
             _bugService = bugService;
         }
 
-       
+
         public ManageAdminVM GetAdminDetails(long adminId)
         {
             try
@@ -35,7 +35,8 @@ namespace EcomzExercise.Services
                     return result;
                 }
                 return null;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 BugListVM bug = _bugService.ExceptionToBug(ex);
                 _bugService.AddBug(bug);
@@ -99,8 +100,10 @@ namespace EcomzExercise.Services
                         return "Invalid Credentials";
 
                 }
-                return "Invalid Credeentials";
-            } catch (Exception ex)
+                else
+                    return "Invalid Credeentials";
+            }
+            catch (Exception ex)
             {
                 BugListVM bug = _bugService.ExceptionToBug(ex);
                 _bugService.AddBug(bug);
@@ -108,7 +111,7 @@ namespace EcomzExercise.Services
             }
         }
 
-    
+
         public string CheckLoginToken(CheckLoginTokenVM vm)
         {
             try
@@ -123,7 +126,8 @@ namespace EcomzExercise.Services
                     return "UnAuthorized";
                 }
                 return "UnAuthorized";
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 BugListVM bug = _bugService.ExceptionToBug(ex);
                 _bugService.AddBug(bug);
@@ -131,7 +135,7 @@ namespace EcomzExercise.Services
             }
         }
 
-        
+
         public string AddNewAdmin(ManageAdminVM vm)
         {
 
@@ -161,7 +165,8 @@ namespace EcomzExercise.Services
                     return "Success";
                 }
                 return "Email Already Exist";
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 BugListVM bug = _bugService.ExceptionToBug(ex);
                 _bugService.AddBug(bug);
@@ -169,7 +174,7 @@ namespace EcomzExercise.Services
             }
         }
 
-        
+
         public string UpdateAdmin(ManageAdminVM vm)
         {
             try
@@ -184,7 +189,8 @@ namespace EcomzExercise.Services
                     return "Success";
                 }
                 return $"Admin Id : ${vm.AdminId} does not exist";
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 BugListVM bug = _bugService.ExceptionToBug(ex);
                 _bugService.AddBug(bug);
@@ -210,7 +216,8 @@ namespace EcomzExercise.Services
 
                 }
                 return "Invalid Credientials";
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 BugListVM bug = _bugService.ExceptionToBug(ex);
                 _bugService.AddBug(bug);
@@ -239,6 +246,6 @@ namespace EcomzExercise.Services
                 return ex.Message;
             }
         }
-        
+
     }
 }
